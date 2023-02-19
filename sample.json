@@ -1,0 +1,52 @@
+{
+	"data": {
+		"timelines": [{
+			"timestep": "1h",
+			"endTime": "2023-02-17T16:00:00Z",
+			"startTime": "2023-02-17T10:00:00Z",
+			"intervals": [{
+				"startTime": "2023-02-17T10:00:00Z",
+				"values": {
+					"temperature": 13.13,
+					"weatherCode": 1001
+				}
+			}, {
+				"startTime": "2023-02-17T11:00:00Z",
+				"values": {
+					"temperature": 12.43,
+					"weatherCode": 1001
+				}
+			}, {
+				"startTime": "2023-02-17T12:00:00Z",
+				"values": {
+					"temperature": 12.5,
+					"weatherCode": 1001
+				}
+			}, {
+				"startTime": "2023-02-17T13:00:00Z",
+				"values": {
+					"temperature": 13.28,
+					"weatherCode": 1001
+				}
+			}, {
+				"startTime": "2023-02-17T14:00:00Z",
+				"values": {
+					"temperature": 14.43,
+					"weatherCode": 4200
+				}
+			}, {
+				"startTime": "2023-02-17T15:00:00Z",
+				"values": {
+					"temperature": 14.69,
+					"weatherCode": 4001
+				}
+			}, {
+				"startTime": "2023-02-17T16:00:00Z",
+				"values": {
+					"temperature": 15.39,
+					"weatherCode": 4001
+				}
+			}]
+		}]
+	}
+}
