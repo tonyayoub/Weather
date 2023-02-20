@@ -11,7 +11,9 @@ import SwiftUI
 struct WeatherApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeScreen()
+            HomeScreen(viewModel: .init(locator: GPSLocator(),
+                                        service: TomorrowWeatherService()
+                                       ))
         }
     }
 }

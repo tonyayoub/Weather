@@ -8,25 +8,20 @@
 import SwiftUI
 import CoreLocation
 
-
 struct HomeScreen: View {
-    @StateObject private var viewModel = HomeScreenViewModel()
+    @ObservedObject var viewModel: HomeScreenViewModel
     @State private var scale = TemperatureScale.celsius
-
+    @State private var isHidden = false
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
             Spacer()
-            HStack(alignment: .center, spacing: 16) {
-                Image(systemName: "sun.max.fill")
-                    .font(.largeTitle)
+            if viewModel.isLoading {
+                ProgressView()
+            } else {
                 Text(viewModel.temperatureText)
                     .font(.largeTitle)
             }
-            Text("Sunny outside.\nDon't forget your hat!")
-                .font(.body)
-                .multilineTextAlignment(.center)
             Spacer()
-            
             Picker("Scale:", selection: $scale) {
                 ForEach(TemperatureScale.allCases, id: \.self) { value in
                     Text(value.rawValue)
@@ -34,13 +29,18 @@ struct HomeScreen: View {
                 }
                 .onChange(of: scale) { viewModel.scale.send($0) }
             }
+            Spacer()
+            Toggle("Use simulated data: ", isOn: $viewModel.simulated)
+                .padding()
+                .onChange(of: viewModel.simulated) { _ in
+                    Task { await viewModel.reload() }
+                }
         }
     }
-
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeScreen  ()
+        HomeScreen(viewModel: .init(locator: GPSLocator(), service: TomorrowWeatherService()))
     }
 }

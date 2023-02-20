@@ -12,51 +12,78 @@ import CoreLocation
 
 @MainActor
 class HomeScreenViewModel: ObservableObject {
+    // Subscriptions
     private var bag = Set<AnyCancellable>()
-    private let service = WeatherService()
-    private var locator = CLLocationManager.publishLocation().debounce(for: 3, scheduler: RunLoop.main)
-    private var temperature = CurrentValueSubject<Double?, Never>(nil)
+    
+    // Published properties
+    @Published var temperatureText = ""
+    @Published var isLoading = true
+    @Published var simulated = false
+    
+    // Injected properties
+    private let locator: Locator
+    private let service: WeatherService
+
+    // Local data
+    private var lastKnownTemperature: Double?
+    private var lastKnownLocation: CLLocation?
+    
+    // UI events
     var scale: CurrentValueSubject<TemperatureScale, Never> = CurrentValueSubject(TemperatureScale.celsius)
     
-    @Published var temperatureText = ""
-    @Published var image = ""
-    @Published var hint = ""
-    
-    init() {
-//        Publishers.CombineLatest(locator, scale).sink {
-//            print($0)
-//            print($1)
-//        }
-//        .store(in: &bag)
-        locator.sink { [self] location in
-            print(location)
+    init(locator: Locator, service: WeatherService) {
+        self.locator = locator
+        self.service = service
+        createSubscriptions()
+    }
+
+    private func createSubscriptions() {
+        locator.publishLocation().sink { [weak self] location in
+            self?.lastKnownLocation = location
             Task {
-                temperature.value = try await self.service.loadWeather(location: location)
-                let formatted = String(self.getFormattedTemperature(value: temperature.value, scale: scale.value))
-                self.temperatureText = formatted
+                self?.isLoading = true
+                await self?.fetchWeather(location: location)
+                self?.isLoading = false
             }
-        }
-        .store(in: &bag)
+        }.store(in: &bag)
         
         scale.sink {
-            let formatted = String(self.getFormattedTemperature(value: self.temperature.value, scale: $0))
-            self.temperatureText = formatted
+            self.temperatureText = String(self.getFormattedTemperature(
+                value: self.lastKnownTemperature,
+                scale: $0))
+        }.store(in: &bag)
+    }
+
+    func fetchWeather(location: CLLocation) async {
+        guard let fetchedTemperature = try? await service.loadWeather(
+            location: location,
+            simulated: simulated
+        ) else {
+            print("Error fetching weather. Try using simulated data.")
+            return
         }
-        .store(in: &bag)
+        lastKnownTemperature = fetchedTemperature
+        temperatureText = String(self.getFormattedTemperature(value: lastKnownTemperature, scale: scale.value))
+        isLoading = false
+    }
+    
+    func reload() async {
+        if let location = self.lastKnownLocation {
+            await fetchWeather(location: location)
+        }
     }
 
     func getFormattedTemperature(value: Double?, scale: TemperatureScale) -> String {
         guard let value else { return "" }
         let mf = MeasurementFormatter()
         let temp = Measurement(value: value, unit: UnitTemperature.celsius)
-//        mf.locale = Locale(identifier: "en_GB")
-        mf.locale = getUsedLocale(scale: scale)
-        mf.numberFormatter.maximumFractionDigits = 1
-        
+        mf.locale = getLocale(scale: scale)
+        mf.numberFormatter.maximumFractionDigits = 0
         return mf.string(from: temp )
     }
     
-    func getUsedLocale(scale: TemperatureScale) -> Locale {
+    // A work around to change scale (Celsius/Fahrenheit) without manual calculations and formatting
+    func getLocale(scale: TemperatureScale) -> Locale {
         scale == .celsius ? Locale(identifier: "en_GB") : Locale(identifier: "en_US")
     }
 }

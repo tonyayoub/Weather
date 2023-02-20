@@ -10,7 +10,7 @@ import Combine
 import CoreLocation
 
 extension CLLocationManager {
-    public static func publishLocation() -> LocationPublisher { .init() }
+    public static func publishLocation() -> AnyPublisher<CLLocation, Never> { LocationPublisher().eraseToAnyPublisher() }
 
     public struct LocationPublisher: Publisher {
         public typealias Output = CLLocation
@@ -29,6 +29,8 @@ extension CLLocationManager {
                 self.subscriber = subscriber
                 super.init()
                 locationManager.delegate = self
+                locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+                locationManager.distanceFilter = 3000
             }
 
             func request(_ demand: Subscribers.Demand) {
@@ -41,7 +43,7 @@ extension CLLocationManager {
             }
             
             func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-                for location in locations {
+                if let location = locations.first {
                     _ = subscriber.receive(location)
                 }
             }

@@ -68,19 +68,7 @@ final class WeatherCodingTests: XCTestCase {
             }
             """.data(using: .utf8)!
         )
-
-        let test = "test"
-        XCTAssertEqual(test, "test")
+        XCTAssertEqual(model.data.timelines.count, 1)
+        XCTAssertEqual(model.data.timelines[0].intervals.count, 7)
     }
-
-//    func testEncode() throws {
-//        let model = LibraryProduct.TaxCode(code: "test", name: "name")
-//        let modelData = try JSONEncoder().encode(model)
-//
-//        XCTAssertEqual(
-//            String(data: modelData, encoding: .utf8),
-//            "{\"label\":\"name\",\"code\":\"test\"}"
-//        )
-//    }
-
 }
