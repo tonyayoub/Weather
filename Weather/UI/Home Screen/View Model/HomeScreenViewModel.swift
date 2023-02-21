@@ -29,8 +29,6 @@ class HomeScreenViewModel: ObservableObject {
     private var lastKnownTemperature: Double?
     private var lastKnownLocation: CLLocation?
     
-    // UI events
-    
     init(locator: Locator, service: WeatherService) {
         self.locator = locator
         self.service = service
