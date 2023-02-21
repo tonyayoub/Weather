@@ -10,8 +10,7 @@ import CoreLocation
 
 struct HomeScreen: View {
     @ObservedObject var viewModel: HomeScreenViewModel
-    @State private var scale = TemperatureScale.celsius
-    @State private var isHidden = false
+    
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
             Spacer()
@@ -22,12 +21,11 @@ struct HomeScreen: View {
                     .font(.largeTitle)
             }
             Spacer()
-            Picker("Scale:", selection: $scale) {
+            Picker("Scale:", selection: $viewModel.scale) {
                 ForEach(TemperatureScale.allCases, id: \.self) { value in
                     Text(value.rawValue)
                         .tag(value)
                 }
-                .onChange(of: scale) { viewModel.scale.send($0) }
             }
             Spacer()
             Toggle("Use simulated data: ", isOn: $viewModel.simulated)

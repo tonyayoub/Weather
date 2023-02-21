@@ -19,6 +19,7 @@ class HomeScreenViewModel: ObservableObject {
     @Published var temperatureText = ""
     @Published var isLoading = true
     @Published var simulated = false
+    @Published var scale = TemperatureScale.celsius
     
     // Injected properties
     private let locator: Locator
@@ -29,7 +30,6 @@ class HomeScreenViewModel: ObservableObject {
     private var lastKnownLocation: CLLocation?
     
     // UI events
-    var scale: CurrentValueSubject<TemperatureScale, Never> = CurrentValueSubject(TemperatureScale.celsius)
     
     init(locator: Locator, service: WeatherService) {
         self.locator = locator
@@ -47,11 +47,12 @@ class HomeScreenViewModel: ObservableObject {
             }
         }.store(in: &bag)
         
-        scale.sink {
+        $scale.sink {
             self.temperatureText = String(self.getFormattedTemperature(
                 value: self.lastKnownTemperature,
                 scale: $0))
         }.store(in: &bag)
+        
     }
 
     func fetchWeather(location: CLLocation) async {
@@ -63,7 +64,7 @@ class HomeScreenViewModel: ObservableObject {
             return
         }
         lastKnownTemperature = fetchedTemperature
-        temperatureText = String(self.getFormattedTemperature(value: lastKnownTemperature, scale: scale.value))
+        temperatureText = String(self.getFormattedTemperature(value: lastKnownTemperature, scale: scale))
         isLoading = false
     }
     
