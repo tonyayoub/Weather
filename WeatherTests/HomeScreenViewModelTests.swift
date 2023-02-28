@@ -18,7 +18,7 @@ final class HomeScreenViewModelTests: XCTestCase {
     @MainActor func testLoadingWeather() async throws {
         let viewModel = HomeScreenViewModel(locator: locator, service: service)
         XCTAssertTrue(viewModel.isLoading)
-        XCTAssertEqual(viewModel.scale.value, .celsius)
+        XCTAssertEqual(viewModel.scale, .celsius)
         await viewModel.fetchWeather(location: CLLocation())
         XCTAssertNotEqual(viewModel.temperatureText, "")
         XCTAssertFalse(viewModel.isLoading)
@@ -29,9 +29,9 @@ final class HomeScreenViewModelTests: XCTestCase {
         await viewModel.fetchWeather(location: CLLocation())
         let celsiusTemperatureText = viewModel.temperatureText
         XCTAssertNotEqual(celsiusTemperatureText, "")
-        viewModel.scale.value = .fahrenheit
+        viewModel.scale = .fahrenheit
         let scaleExpectation = XCTestExpectation(description: "Scale changed")
-        viewModel.scale
+        viewModel.$scale
             .sink {
                 if $0 == .fahrenheit {
                     let fahrenheitTemperatureText = viewModel.temperatureText
